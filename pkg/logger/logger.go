@@ -10,13 +10,7 @@ import (
 )
 
 // NewLogger ...
-func NewLogger(databaseURL string) *slog.Logger {
-	var lvl slog.LevelVar
-
-	if err := lvl.UnmarshalText([]byte(databaseURL)); err != nil {
-		lvl.Set(slog.LevelInfo)
-	}
-
+func NewLogger() *slog.Logger {
 	handler := console.NewHandler(
 		os.Stderr,
 		&console.HandlerOptions{

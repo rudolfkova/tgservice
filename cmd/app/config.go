@@ -1,21 +1,55 @@
 package main
 
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+	"github.com/sethvargo/go-envconfig"
+)
+
 // Config ...
 type Config struct {
-	DatabaseURL     string `toml:"database_url"`
-	TestDatabaseURL string `toml:"test_database_url"`
-	RedisAddr       string `toml:"redis_addr"`
-	TestRedisAddr   string `toml:"test_redis_addr"`
-	BindAddr        string `toml:"bind_addr"`
-	LogLevel        string `toml:"log_level"`
-	JWTSecret       string `toml:"jwt_secret"`
-	AuthServiceAddr string `toml:"auth_service_addr"`
+	BindAddr   string `env:"BIND_ADDR,default=:8080"`
+	LogLevel   string `env:"LOG_LEVEL,default=info"`
+	TGAppIDStr string `env:"TG_APP_ID"`
+	TGAppID    int
+	TGAppHash  string `env:"TG_APP_HASH"`
 }
 
-// NewConfig ...
-func NewConfig() *Config {
-	return &Config{
-		BindAddr: ":8080",
-		LogLevel: "info",
+// ParseConfig загружает .env файл (если есть) и парсит переменные окружения.
+func parseConfig() (Config, error) {
+	if err := godotenv.Load("config.env"); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return Config{}, fmt.Errorf("load env variables from file: %w", err)
 	}
+
+	var c Config
+	if err := envconfig.Process(context.Background(), &c); err != nil {
+		return Config{}, fmt.Errorf("parse env variables to config: %w", err)
+	}
+
+	if c.BindAddr == "" {
+		return Config{}, errors.New("var BIND_ADDRESS is required")
+	}
+
+	if c.TGAppIDStr == "" {
+		return Config{}, errors.New("var TG_APP_ID is required")
+	}
+
+	appID, err := strconv.Atoi(c.TGAppIDStr)
+
+	if err != nil {
+		return Config{}, errors.New("var TG_APP_ID convert err")
+	}
+
+	c.TGAppID = appID
+
+	if c.TGAppHash == "" {
+		return Config{}, errors.New("var TG_APP_HASH is required")
+	}
+
+	return c, nil
 }

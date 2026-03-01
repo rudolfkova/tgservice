@@ -1,5 +1,5 @@
 // Package ...
-package error
+package tgerror
 
 import "errors"
 

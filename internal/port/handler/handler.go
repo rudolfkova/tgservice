@@ -12,13 +12,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// SessionUsecase — интерфейс для работы с сессиями.
+// SessionUsecase ...
 type SessionUsecase interface {
 	CreateSession(ctx context.Context) (sessionID, qrCode string, err error)
 	DeleteSession(ctx context.Context, sessionID string) error
 }
 
-// MessageUsecase — интерфейс для работы с сообщениями.
+// MessageUsecase ...
 type MessageUsecase interface {
 	SendMessage(ctx context.Context, sessionID, peer, text string) (messageID int64, err error)
 	// SubscribeMessages возвращает канал входящих сообщений для сессии.
