@@ -12,3 +12,10 @@ build:
 .PHONY: start
 start:
 	./app.exe
+
+.PHONY: mocks
+mocks:
+	mockery --name=SessionUsecase --dir=./internal/port/handler --output=./mocks --outpkg=mocks
+	mockery --name=MessageUsecase --dir=./internal/port/handler --output=./mocks --outpkg=mocks
+	mockery --name=TelegramMessenger --dir=./internal/usecase --output=./mocks --outpkg=mocks
+	mockery --name=TelegramDriver --dir=./internal/usecase --output=./mocks --outpkg=mocks
