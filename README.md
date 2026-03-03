@@ -86,7 +86,8 @@
 ```
 TELEGRAM_API_ID=
 TELEGRAM_API_HASH=
-GRPC_PORT=
+LOG_LEVEL=
+BIND_ADDR=
 ```
 
 ---
@@ -179,5 +180,6 @@ go test ./...
 
 * Добавление внешнего хранилища (PostgreSQL/Redis)
 * Метрики (Prometheus)
+* Docker
 
 ---

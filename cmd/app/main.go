@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -16,12 +17,11 @@ import (
 )
 
 func main() {
-	logger := logger.NewLogger()
 	cfg, err := parseConfig()
 	if err != nil {
-		logger.Error("config error", slog.String("err", err.Error()))
-		os.Exit(1)
+		log.Fatal("error config parse")
 	}
+	logger := logger.NewLogger(cfg.LogLevel)
 
 	drv := driver.NewDriver(cfg.TGAppID, cfg.TGAppHash, logger)
 

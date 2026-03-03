@@ -10,11 +10,17 @@ import (
 )
 
 // NewLogger ...
-func NewLogger() *slog.Logger {
+func NewLogger(logLevel string) *slog.Logger {
+	var lvl slog.Level
+
+	if err := lvl.UnmarshalText([]byte(logLevel)); err != nil {
+		lvl = slog.LevelInfo
+	}
+
 	handler := console.NewHandler(
 		os.Stderr,
 		&console.HandlerOptions{
-			Level:      slog.LevelDebug,
+			Level:      lvl,
 			TimeFormat: time.TimeOnly,
 		},
 	)
