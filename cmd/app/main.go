@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"tgservice/internal/driver"
 	"tgservice/internal/port"
@@ -27,8 +31,30 @@ func main() {
 	srv := port.NewServer(logger)
 	handler.Register(srv.GRPC(), sessionUC, messageUC, logger)
 
-	if err := srv.Run(cfg.BindAddr); err != nil {
-		logger.Error("server error", slog.String("err", err.Error()))
-		os.Exit(1)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	go func() {
+		if err := srv.Run(cfg.BindAddr); err != nil {
+			logger.Error("server error", slog.String("err", err.Error()))
+		}
+	}()
+
+	<-ctx.Done()
+
+	logger.Info("Shutdown signal received")
+
+	done := make(chan struct{})
+	go func() {
+		srv.GRPC().GracefulStop()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		logger.Info("Server gracefully stopped")
+	case <-time.After(10 * time.Second):
+		logger.Warn("Graceful shutdown timeout, forcing stop")
+		srv.GRPC().Stop()
 	}
 }
